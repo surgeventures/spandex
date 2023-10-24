@@ -359,24 +359,6 @@ defmodule Spandex do
   end
 
   @doc """
-  Given a trace_id and span_id, resumes a trace from a different process or service.
-
-  Span updates for the top span may be passed in. They are skipped if they are
-  invalid updates. As such, if you aren't sure if your updates are valid, it is
-  safer to perform a second call to `update_span/2` and check the return value.
-  """
-  @spec continue_trace(String.t(), Spandex.id(), Spandex.id(), Keyword.t()) ::
-          {:ok, Trace.t()}
-          | {:error, :disabled}
-          | {:error, :trace_already_present}
-  @deprecated "Use continue_trace/3 instead"
-  def continue_trace(_, _, _, :disabled), do: {:error, :disabled}
-
-  def continue_trace(name, trace_id, span_id, opts) do
-    continue_trace(name, %SpanContext{trace_id: trace_id, parent_id: span_id}, opts)
-  end
-
-  @doc """
   Given a span struct, resumes a trace from a different process or service.
 
   Span updates for the top span may be passed in. They are skipped if they are
@@ -387,6 +369,7 @@ defmodule Spandex do
           {:ok, Trace.t()}
           | {:error, :disabled}
           | {:error, :trace_already_present}
+  @deprecated "Use `continue_trace/3` instead"
   def continue_trace_from_span(_name, _span, :disabled), do: {:error, :disabled}
 
   def continue_trace_from_span(name, span, opts) do
