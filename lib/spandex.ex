@@ -486,6 +486,7 @@ defmodule Spandex do
   defp do_start_trace(name, opts) do
     strategy = opts[:strategy]
     adapter = opts[:adapter]
+    sampling_strategy = opts[:sampling_strategy] || adapter.default_sampling_strategy()
     trace_id = adapter.trace_id()
     span_context = %SpanContext{trace_id: trace_id}
 
