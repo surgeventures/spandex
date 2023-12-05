@@ -6,5 +6,9 @@ defmodule Spandex.TestSamplingStrategy do
   @behaviour Spandex.SamplingStrategy
 
   @impl true
-  def calculate_priority(_trace_id, opts \\ []), do: 1
+  def calculate_sampling(_trace_id, _opts \\ []), do: %{
+    priority: 1,
+    sampling_rate_used: 1.0,
+    sampling_mechanism_used: "test"
+  }
 end
