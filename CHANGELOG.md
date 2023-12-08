@@ -2,11 +2,11 @@
 
 <!-- changelog -->
 
-## [3.3.0](https://github.com/spandex-project/spandex/compare/3.2.0...3.3.0) (2023-10-30)
+## [4.0.0](https://github.com/spandex-project/spandex/compare/3.2.0...4.0.0) (2023-10-30)
 
 ### Features:
 
-* Add support for different sampling strategies for setting new trace's priority field by @JerzyDziala in https://github.com/surgeventures/spandex/pull/1
+* Add support for different sampling strategies by @JerzyDziala in https://github.com/surgeventures/spandex/pull/1
 
 ## [3.2.0](https://github.com/spandex-project/spandex/compare/3.1.0...3.2.0) (2022-10-20)
 
