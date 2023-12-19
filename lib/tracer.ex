@@ -26,11 +26,13 @@ defmodule Spandex.Tracer do
   @callback start_span(span_name, opts) :: tagged_tuple(Span.t())
   @callback update_span(opts) :: tagged_tuple(Span.t())
   @callback update_top_span(opts) :: tagged_tuple(Span.t())
+  @callback update_sampling(sampling :: map(), opts) :: tagged_tuple(Trace.t())
   @callback finish_trace(opts) :: tagged_tuple(Trace.t())
   @callback finish_span(opts) :: tagged_tuple(Span.t())
   @callback span_error(error :: Exception.t(), stacktrace :: [term], opts) :: tagged_tuple(Span.t())
   @callback continue_trace(span_name :: String.t(), trace_context :: SpanContext.t(), opts) :: tagged_tuple(Trace.t())
   @callback continue_trace_from_span(span_name, span :: term, opts) :: tagged_tuple(Trace.t())
+  @callback current_sampling(opts) :: nil | map()
   @callback current_trace_id(opts) :: nil | Spandex.id()
   @callback current_span_id(opts) :: nil | Spandex.id()
   @callback current_span(opts) :: nil | Span.t()
@@ -54,6 +56,7 @@ defmodule Spandex.Tracer do
                    service_version: :string,
                    services: {:keyword, :atom},
                    strategy: :atom,
+                   sampling_strategy: :atom,
                    sender: :atom,
                    trace_key: :atom
                  ],
@@ -73,7 +76,9 @@ defmodule Spandex.Tracer do
                    disabled?: "Allows for wholesale disabling a tracer",
                    env: "A name used to identify the environment name, e.g `prod` or `development`",
                    services: "A mapping of service name to the default span types.",
-                   strategy: "The storage and tracing strategy. Currently only supports local process dictionary."
+                   strategy: "The storage and tracing strategy. Currently only supports local process dictionary.",
+                   sampling_strategy:
+                     "The sampling strategy to use. It makes the decision of whether to sample out a trace or not."
                  ]
                )
 
@@ -182,6 +187,11 @@ defmodule Spandex.Tracer do
       end
 
       @impl Spandex.Tracer
+      def update_sampling(sampling, opts \\ []) do
+        Spandex.update_sampling(sampling, config(opts, @otp_app))
+      end
+
+      @impl Spandex.Tracer
       def finish_trace(opts \\ []) do
         opts
         |> validate_update_config(@otp_app)
@@ -220,6 +230,11 @@ defmodule Spandex.Tracer do
       @impl Spandex.Tracer
       def continue_trace_from_span(span_name, span, opts \\ []) do
         Spandex.continue_trace_from_span(span_name, span, config(opts, @otp_app))
+      end
+
+      @impl Spandex.Tracer
+      def current_sampling(opts \\ []) do
+        Spandex.current_sampling(config(opts, @otp_app))
       end
 
       @impl Spandex.Tracer
@@ -298,6 +313,8 @@ defmodule Spandex.Tracer do
           |> Keyword.put(:sender, env[:sender])
         end
       end
+
+      defoverridable Spandex.Tracer
     end
   end
 end

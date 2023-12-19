@@ -105,6 +105,47 @@ defmodule Spandex do
   end
 
   @doc """
+  Update the sampling properties of the current trace.
+  """
+  @spec update_sampling(any(), Tracer.opts()) ::
+          {:ok, Trace.t()}
+          | {:error, :disabled}
+          | {:error, :no_trace_context}
+          | {:error, [Optimal.error()]}
+  def update_sampling(_, :disabled), do: {:error, :disabled}
+
+  def update_sampling(new_sampling, opts) do
+    strategy = opts[:strategy]
+
+    with {:ok, trace} <- strategy.get_trace(opts[:trace_key]) do
+      strategy.put_trace(opts[:trace_key], %{
+        trace
+        | sampling: new_sampling
+      })
+    end
+  end
+
+  @doc """
+  Returns the sampling properties of the currently running trace.
+  """
+  @spec current_sampling(Tracer.opts()) :: any() | nil
+  def current_sampling(:disabled), do: nil
+
+  def current_sampling(opts) do
+    strategy = opts[:strategy]
+
+    case strategy.get_trace(opts[:trace_key]) do
+      {:ok, %Trace{sampling: sampling}} ->
+        sampling
+
+      {:error, _} ->
+        # TODO: Alter the return type of this interface to allow for returning
+        # errors from fetching the trace.
+        nil
+    end
+  end
+
+  @doc """
   Updates the top-most parent span.
 
   Any spans that have already been started will not inherit any of the updates
@@ -323,8 +364,8 @@ defmodule Spandex do
     strategy = opts[:strategy]
 
     case strategy.get_trace(opts[:trace_key]) do
-      {:ok, %Trace{id: trace_id, priority: priority, baggage: baggage, stack: [%Span{id: span_id} | _]}} ->
-        {:ok, %SpanContext{trace_id: trace_id, priority: priority, baggage: baggage, parent_id: span_id}}
+      {:ok, %Trace{id: trace_id, sampling: sampling, baggage: baggage, stack: [%Span{id: span_id} | _]}} ->
+        {:ok, %SpanContext{trace_id: trace_id, priority: sampling.priority, baggage: baggage, parent_id: span_id}}
 
       {:ok, %Trace{stack: []}} ->
         {:error, :no_span_context}
@@ -359,24 +400,6 @@ defmodule Spandex do
   end
 
   @doc """
-  Given a trace_id and span_id, resumes a trace from a different process or service.
-
-  Span updates for the top span may be passed in. They are skipped if they are
-  invalid updates. As such, if you aren't sure if your updates are valid, it is
-  safer to perform a second call to `update_span/2` and check the return value.
-  """
-  @spec continue_trace(String.t(), Spandex.id(), Spandex.id(), Keyword.t()) ::
-          {:ok, Trace.t()}
-          | {:error, :disabled}
-          | {:error, :trace_already_present}
-  @deprecated "Use continue_trace/3 instead"
-  def continue_trace(_, _, _, :disabled), do: {:error, :disabled}
-
-  def continue_trace(name, trace_id, span_id, opts) do
-    continue_trace(name, %SpanContext{trace_id: trace_id, parent_id: span_id}, opts)
-  end
-
-  @doc """
   Given a span struct, resumes a trace from a different process or service.
 
   Span updates for the top span may be passed in. They are skipped if they are
@@ -387,6 +410,7 @@ defmodule Spandex do
           {:ok, Trace.t()}
           | {:error, :disabled}
           | {:error, :trace_already_present}
+  @deprecated "Use `continue_trace/3` instead"
   def continue_trace_from_span(_name, _span, :disabled), do: {:error, :disabled}
 
   def continue_trace_from_span(name, span, opts) do
@@ -457,7 +481,11 @@ defmodule Spandex do
 
       trace = %Trace{
         id: span_context.trace_id,
-        priority: span_context.priority,
+        sampling: %{
+          priority: span_context.priority,
+          sampling_rate_used: nil,
+          mechanism_used: nil
+        },
         baggage: span_context.baggage,
         stack: [top_span],
         spans: []
@@ -488,10 +516,10 @@ defmodule Spandex do
     end
   end
 
-  defp do_start_span(name, %Trace{stack: [], id: trace_id} = trace, opts) do
+  defp do_start_span(name, %Trace{stack: [], id: trace_id, sampling: sampling} = trace, opts) do
     strategy = opts[:strategy]
     adapter = opts[:adapter]
-    span_context = %SpanContext{trace_id: trace_id}
+    span_context = %SpanContext{trace_id: trace_id, priority: sampling.priority}
 
     with {:ok, span} <- span(name, opts, span_context, adapter),
          {:ok, _trace} <- strategy.put_trace(opts[:trace_key], %{trace | stack: [span]}) do
@@ -503,8 +531,14 @@ defmodule Spandex do
   defp do_start_trace(name, opts) do
     strategy = opts[:strategy]
     adapter = opts[:adapter]
+    sampling_strategy = opts[:sampling_strategy] || adapter.default_sampling_strategy()
     trace_id = adapter.trace_id()
-    span_context = %SpanContext{trace_id: trace_id}
+
+    sampling = sampling_strategy.calculate_sampling(trace_id, opts)
+
+    span_context = %SpanContext{
+      trace_id: trace_id
+    }
 
     with {:ok, span} <- span(name, opts, span_context, adapter) do
       Logger.metadata(trace_id: to_string(trace_id), span_id: to_string(span.id))

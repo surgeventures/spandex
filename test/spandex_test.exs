@@ -591,51 +591,7 @@ defmodule Spandex.Test.SpandexTest do
     end
   end
 
-  describe "Spandex.continue_trace/4 (DEPRECATED)" do
-    test "starts a new child span in an existing trace based on a specified name, trace ID and parent span ID" do
-      opts = @base_opts ++ @span_opts
-      assert {:ok, %Trace{id: 123}} = Spandex.continue_trace("root_span", 123, 456, opts)
-      assert %Span{parent_id: 456, name: "root_span"} = Spandex.current_span(@base_opts)
-    end
-
-    test "returns an error if there is already a trace in progress" do
-      opts = @base_opts ++ @span_opts
-      assert {:ok, %Trace{}} = Spandex.start_trace("root_span", opts)
-
-      log =
-        capture_log(fn ->
-          assert {:error, :trace_already_present} = Spandex.continue_trace("span_name", 123, 456, opts)
-        end)
-
-      assert String.contains?(log, "[error] Tried to continue a trace over top of another trace")
-    end
-
-    test "returns an error if tracing is disabled" do
-      assert {:error, :disabled} == Spandex.continue_trace("span_name", 123, 456, :disabled)
-    end
-
-    test "returns an error if invalid options are specified" do
-      assert {:error, validation_errors} =
-               Spandex.continue_trace("span_name", 123, 456, @base_opts ++ [type: "not an atom"])
-
-      assert {:type, "must be of type :atom"} in validation_errors
-    end
-
-    test "adds span_id, trace_id to log metadata" do
-      opts = @base_opts ++ @span_opts
-
-      log =
-        capture_log(fn ->
-          Spandex.continue_trace("root_span", 123, 456, opts)
-          Logger.info("test logs")
-        end)
-
-      assert String.contains?(log, "trace_id")
-      assert String.contains?(log, "span_id")
-    end
-  end
-
-  describe "Spandex.continue_trace_from_span/3" do
+  describe "(DEPRECATED) Spandex.continue_trace_from_span/3" do
     test "returns a new trace based on a specified name and existing span" do
       existing_span = %Span{id: 456, trace_id: 123, name: "existing"}
 

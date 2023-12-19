@@ -14,4 +14,10 @@ defmodule Spandex.Adapter do
   @callback span_id() :: Spandex.id()
   @callback now() :: Spandex.timestamp()
   @callback default_sender() :: module()
+
+  @doc """
+  Returns the default sampling strategy for the adapter.
+  """
+  @callback default_sampling_strategy() :: Spandex.SamplingStrategy.t()
+
 end

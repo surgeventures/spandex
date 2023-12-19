@@ -12,6 +12,7 @@ config :spandex, Spandex.Test.Support.Tracer,
   service: :spandex_test,
   adapter: Spandex.TestAdapter,
   sender: Spandex.TestSender,
+  sampling_strategy: Spandex.TestSamplingStrategy,
   env: "test",
   resource: "default",
   services: [

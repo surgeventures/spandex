@@ -4,13 +4,13 @@ defmodule Spandex.Trace do
 
   * `baggage`: Key-value metadata about the overall trace (propagated across distributed service)
   * `id`: The trace ID, which consistently refers to this trace across distributed services
-  * `priority`: The trace sampling priority for this trace (propagated across distributed services)
+  * `sampling`: The sampling decision for this trace from this process. the shape of this value is up to the sampling strategy and can be adapter-specific
   * `spans`: The set of completed spans for this trace from this process
   * `stack`: The stack of active parent spans
   """
   defstruct baggage: [],
             id: nil,
-            priority: 1,
+            sampling: %{},
             spans: [],
             stack: []
 
@@ -18,7 +18,7 @@ defmodule Spandex.Trace do
   @type t :: %__MODULE__{
           baggage: Keyword.t(),
           id: Spandex.id(),
-          priority: integer(),
+          sampling: any(),
           spans: [Spandex.Span.t()],
           stack: [Spandex.Span.t()]
         }
