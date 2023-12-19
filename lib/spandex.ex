@@ -107,11 +107,11 @@ defmodule Spandex do
   @doc """
   Update the sampling properties of the current trace.
   """
-  @spec update_sampling(map(), Tracer.opts()) ::
+  @spec update_sampling(any(), Tracer.opts()) ::
           {:ok, Trace.t()}
           | {:error, :disabled}
           | {:error, :no_trace_context}
-            | {:error, [Optimal.error()]}
+          | {:error, [Optimal.error()]}
   def update_sampling(_, :disabled), do: {:error, :disabled}
 
   def update_sampling(new_sampling, opts) do
@@ -119,8 +119,8 @@ defmodule Spandex do
 
     with {:ok, trace} <- strategy.get_trace(opts[:trace_key]) do
       strategy.put_trace(opts[:trace_key], %{
-        trace |
-        sampling: new_sampling
+        trace
+        | sampling: new_sampling
       })
     end
   end
@@ -128,7 +128,7 @@ defmodule Spandex do
   @doc """
   Returns the sampling properties of the currently running trace.
   """
-  @spec current_sampling(Tracer.opts()) :: map() | nil
+  @spec current_sampling(Tracer.opts()) :: any() | nil
   def current_sampling(:disabled), do: nil
 
   def current_sampling(opts) do
@@ -516,10 +516,10 @@ defmodule Spandex do
     end
   end
 
-  defp do_start_span(name, %Trace{stack: [], id: trace_id} = trace, opts) do
+  defp do_start_span(name, %Trace{stack: [], id: trace_id, sampling: sampling} = trace, opts) do
     strategy = opts[:strategy]
     adapter = opts[:adapter]
-    span_context = %SpanContext{trace_id: trace_id}
+    span_context = %SpanContext{trace_id: trace_id, priority: sampling.priority}
 
     with {:ok, span} <- span(name, opts, span_context, adapter),
          {:ok, _trace} <- strategy.put_trace(opts[:trace_key], %{trace | stack: [span]}) do
@@ -533,7 +533,12 @@ defmodule Spandex do
     adapter = opts[:adapter]
     sampling_strategy = opts[:sampling_strategy] || adapter.default_sampling_strategy()
     trace_id = adapter.trace_id()
-    span_context = %SpanContext{trace_id: trace_id}
+
+    sampling = sampling_strategy.calculate_sampling(trace_id, opts)
+
+    span_context = %SpanContext{
+      trace_id: trace_id
+    }
 
     with {:ok, span} <- span(name, opts, span_context, adapter) do
       Logger.metadata(trace_id: to_string(trace_id), span_id: to_string(span.id))

@@ -64,7 +64,7 @@ defmodule Spandex.Tracer do
                  defaults: [
                    disabled?: false,
                    services: [],
-                   strategy: Spandex.Strategy.Pdict,
+                   strategy: Spandex.Strategy.Pdict
                  ],
                  describe: [
                    adapter: "The third party adapter to use",
@@ -77,7 +77,8 @@ defmodule Spandex.Tracer do
                    env: "A name used to identify the environment name, e.g `prod` or `development`",
                    services: "A mapping of service name to the default span types.",
                    strategy: "The storage and tracing strategy. Currently only supports local process dictionary.",
-                   sampling_strategy: "The sampling strategy to use. It makes the decision of whether to sample out a trace or not."
+                   sampling_strategy:
+                     "The sampling strategy to use. It makes the decision of whether to sample out a trace or not."
                  ]
                )
 

@@ -297,20 +297,9 @@ sampling, the process that starts the trace can make a decision about whether
 it should be sampled. It then passes that information to downstream processes
 via an HTTP header.
 
-Every trace in Spandex has a `priority` describing whether it should be sampled
-or not. This priority is set automatically when starting a new
-trace - either based on the distributed context or calculated by a `SamplingStrategy`
-
-A trace may be sampled out automatically, but you can always override its
-`priority` manually. This is usually done for requests with errors, as they are
-the ones that need troubleshooting. You can also enable tracing dynamically with
-a feature flag to debug a feature in production.
-
-While Spandex implements functions to read and set the `priority`
-(`Spandex.Tracer.current_priority/1` and `Spandex.Tracer.update_priority/2`
-respectively), it's best to use `priority`-modifying functions exposed by a
-particular adapter as the field has different meaning across observability
-backends.
+Every trace in Spandex has a `sampling` field which is used to store any details about the sampling decision.
+It is adapter specific and is set automatically when starting a new trace,
+either based on the distributed context or calculated by a `SamplingStrategy`
 
 You can find more information on sampling and rate limiting in documentation for
 adapters like [spandex_datadog](https://github.com/spandex-project/spandex_datadog).
