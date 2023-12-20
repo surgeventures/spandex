@@ -227,6 +227,7 @@ defmodule Spandex.Tracer do
         continue_trace(span_name, %SpanContext{trace_id: trace_id, parent_id: span_id}, opts)
       end
 
+      @deprecated "please use continue_trace/3 instead"
       @impl Spandex.Tracer
       def continue_trace_from_span(span_name, span, opts \\ []) do
         Spandex.continue_trace_from_span(span_name, span, config(opts, @otp_app))
