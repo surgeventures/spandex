@@ -1,7 +1,7 @@
 defmodule Spandex.Mixfile do
   use Mix.Project
 
-  @source_url "https://github.com/spandex-project/spandex"
+  @source_url "https://github.com/surgeventures/spandex"
   @version "4.0.0"
 
   def project do
@@ -33,7 +33,8 @@ defmodule Spandex.Mixfile do
 
   defp package do
     [
-      name: :spandex,
+      name: :spandex_fresha,
+      organization: "fresha",
       maintainers: ["Greg Mefford"],
       licenses: ["MIT License"],
       links: %{
