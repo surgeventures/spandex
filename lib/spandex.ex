@@ -410,7 +410,6 @@ defmodule Spandex do
           {:ok, Trace.t()}
           | {:error, :disabled}
           | {:error, :trace_already_present}
-  @deprecated "Use `continue_trace/3` instead"
   def continue_trace_from_span(_name, _span, :disabled), do: {:error, :disabled}
 
   def continue_trace_from_span(name, span, opts) do
