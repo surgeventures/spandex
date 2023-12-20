@@ -542,7 +542,7 @@ defmodule Spandex do
 
     with {:ok, span} <- span(name, opts, span_context, adapter) do
       Logger.metadata(trace_id: to_string(trace_id), span_id: to_string(span.id))
-      trace = %Trace{spans: [], stack: [span], id: trace_id}
+      trace = %Trace{spans: [], stack: [span], id: trace_id, sampling: sampling}
       strategy.put_trace(opts[:trace_key], trace)
     end
   end
