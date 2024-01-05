@@ -2,6 +2,12 @@
 
 <!-- changelog -->
 
+## [4.1.0](https://github.com/spandex-project/spandex/compare/4.0.0...4.1.0) (2024-01-05)
+
+### Features:
+
+* Allow for passing in options for the sampling strategy by @JerzyDziala in https://github.com/surgeventures/spandex/pull/2
+
 ## [4.0.0](https://github.com/spandex-project/spandex/compare/3.2.0...4.0.0) (2023-10-30)
 
 ### Features:
