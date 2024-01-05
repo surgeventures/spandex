@@ -57,6 +57,7 @@ defmodule Spandex.Tracer do
                    services: {:keyword, :atom},
                    strategy: :atom,
                    sampling_strategy: :atom,
+                   sampling_options: {:keyword, :any},
                    sender: :atom,
                    trace_key: :atom
                  ],
@@ -64,7 +65,8 @@ defmodule Spandex.Tracer do
                  defaults: [
                    disabled?: false,
                    services: [],
-                   strategy: Spandex.Strategy.Pdict
+                   strategy: Spandex.Strategy.Pdict,
+                   sampling_options: []
                  ],
                  describe: [
                    adapter: "The third party adapter to use",
@@ -78,7 +80,8 @@ defmodule Spandex.Tracer do
                    services: "A mapping of service name to the default span types.",
                    strategy: "The storage and tracing strategy. Currently only supports local process dictionary.",
                    sampling_strategy:
-                     "The sampling strategy to use. It makes the decision of whether to sample out a trace or not."
+                     "The sampling strategy to use. It makes the decision of whether to sample out a trace or not.",
+                   sampling_options: "Any additional options to pass to the sampling strategy."
                  ]
                )
 
