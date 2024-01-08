@@ -57,7 +57,7 @@ defmodule Spandex.Tracer do
                    services: {:keyword, :atom},
                    strategy: :atom,
                    sampling_strategy: :atom,
-                   sampling_options: {:keyword, :any},
+                   sampling_options: :keyword,
                    sender: :atom,
                    trace_key: :atom
                  ],
@@ -82,7 +82,8 @@ defmodule Spandex.Tracer do
                    sampling_strategy:
                      "The sampling strategy to use. It makes the decision of whether to sample out a trace or not.",
                    sampling_options: "Any additional options to pass to the sampling strategy."
-                 ]
+                 ],
+                  extra_keys?: true
                )
 
   @all_tracer_opts @tracer_opts
@@ -91,7 +92,6 @@ defmodule Spandex.Tracer do
                      annotate: "Span Creation",
                      add_required?: false
                    )
-                   |> Map.put(:extra_keys?, false)
 
   @doc """
   A schema for the opts that a tracer accepts.
