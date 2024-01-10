@@ -47,7 +47,9 @@ This is Datadog-specific since that's currently the only adapter.
 
 ```elixir
 def deps do
-  [{:spandex_fresha, "~> 4.0", organization: "fresha"}]
+  [
+    {:spandex, "~> 4.0", hex: :spandex_fresha, organization: "fresha"}
+  ]
 end
 ```
 
